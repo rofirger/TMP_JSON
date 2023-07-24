@@ -1,3 +1,8 @@
+/*
+* @brief:
+* @BUG fix:
+*	1. 修复函数未先声明导致编译器无法探寻正确的函数定义BUG
+*/
 #pragma once
 #include <iostream>
 #include <sstream>
@@ -79,7 +84,7 @@ namespace JSON {
 	template<typename _Ty>
 	struct enable_if<false, _Ty> {};
 	// 注意这里一定不能漏typename，不然会出现奇怪的编译错误。
-	template<bool _B, typename _Ty>
+	template<bool _B, typename _Ty = void>
 	using enable_if_t = typename enable_if<_B, _Ty>::type;
 
 	/* 移除 CV */
@@ -258,6 +263,92 @@ namespace JSON {
 	template<typename _Ty>
 	using add_rvalue_reference_t = typename add_rvalue_reference<_Ty>::type;
 
+	/***********************
+	* Function declaration *
+	***********************/
+	template<typename _Ty>
+	enable_if_t<is_one_of_v<decay_t<_Ty>,
+		int, long, long long, unsigned,
+		unsigned long, unsigned long long,
+		float, double, long double>, std::string>
+		dumps(const _Ty& _value);
+
+	// For std::string, char
+	template<typename _Ty>
+	enable_if_t<is_one_of_v<decay_t<_Ty>,
+		char, std::string>, std::string>
+		dumps(const _Ty& _obj);
+
+	std::string dumps(const char* _s);
+
+	template<typename _Ty>
+	enable_if_t<is_one_of_v<decay_t<_Ty>,
+		void, std::nullptr_t>, std::string >
+		dumps(const _Ty& _t);
+
+	template<typename _Ty>
+	inline enable_if_t<is_one_of_v<decay_t<_Ty>, bool>, std::string>
+		dumps(const _Ty& _b);
+
+	template<template<typename...> typename _Tmp, typename ..._Args>
+	enable_if_t<
+		is_instantiation_of_v<_Tmp<_Args...>, std::vector> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::list> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::deque> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::forward_list> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::set> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::multiset> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::unordered_set> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::unordered_multiset>,
+		std::string>
+		dumps(const _Tmp<_Args...>& _obj);
+
+	template<template<typename...> typename _Tmp, typename ..._Args>
+	enable_if_t<
+		is_instantiation_of_v<_Tmp<_Args...>, std::map> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::multimap> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::unordered_map> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::unordered_multimap>,
+		std::string>
+		dumps(const _Tmp<_Args...>& _obj);
+
+	template<typename _First, typename _Second>
+	std::string
+		dumps(const std::pair<_First, _Second>& __obj);
+
+	template<typename _Ty>
+	enable_if_t<is_array_v<_Ty>, std::string>
+		dumps(const _Ty& __arr);
+
+	template <typename _Ty, std::size_t _N>
+	std::string
+		dumps(const std::array<_Ty, _N>& __obj);
+
+	template<size_t _N, typename ..._Args>
+	enable_if_t<_N == sizeof...(_Args) - 1, std::string>
+		dumps(const std::tuple<_Args...>& __obj);
+
+	template<size_t _N, typename ..._Args>
+	enable_if_t<_N != 0 && _N != sizeof...(_Args) - 1, std::string>
+		dumps(const std::tuple<_Args...>& __obj);
+
+	template<size_t _N = 0, typename ..._Args>
+	enable_if_t<_N == 0, std::string>
+		dumps(const std::tuple<_Args...>& __obj);
+
+	template<typename _Ty>
+	enable_if_t<is_pointer_v<_Ty>, std::string>
+		dumps(const _Ty __p);
+
+	template<template<typename...> typename _Tmp, typename ..._Args>
+	enable_if_t<
+		is_instantiation_of_v<_Tmp<_Args...>, std::shared_ptr> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::weak_ptr> ||
+		is_instantiation_of_v<_Tmp<_Args...>, std::unique_ptr>,
+		std::string>
+		dumps(const _Tmp<_Args...>& __p);
+	/***********************************/
+
 	/** 实现dumps **/
 	template<typename _Ty>
 	inline enable_if_t<is_one_of_v<decay_t<_Ty>,
@@ -309,6 +400,7 @@ namespace JSON {
 		__ss << "]";
 		return __ss.str();
 	}
+
 	// For map, multimap, unordered_map, unordered_multimap
 	template<template<typename...> typename _Tmp, typename ..._Args>
 	enable_if_t<
