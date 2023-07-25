@@ -40,7 +40,8 @@ namespace JSON {
 	template<typename _Ty>
 	struct is_same<_Ty, _Ty> : true_type {};
 	template<typename _First, typename _Second>
-	static constexpr bool is_same_v = is_same<_First, _Second>::value;
+	static constexpr typename is_same<_First, _Second>::value_type
+		is_same_v = is_same<_First, _Second>::value;
 
 	/* 实现is_one_of */
 	template<typename _Ty, typename ..._Args>
@@ -50,17 +51,20 @@ namespace JSON {
 	template<typename _First, typename ..._Args>
 	struct is_one_of<_First, _First, _Args...> : true_type {};
 	template<typename _First, typename ..._Args>
-	static constexpr bool is_one_of_v = is_one_of<_First, _Args...>::value;
+	static constexpr typename is_one_of<_First, _Args...>::value_type
+		is_one_of_v = is_one_of<_First, _Args...>::value;
 
 	/* 实现is_integral，is_floating_point */
 	template <typename _Ty>
 	using is_integral = is_one_of<_Ty, bool, char, short, int, long, long long>;
 	template <typename _Ty>
-	static constexpr bool is_integral_v = is_integral<_Ty>::value;
+	static constexpr typename is_integral<_Ty>::value_type
+		is_integral_v = is_integral<_Ty>::value;
 	template <typename _Ty>
 	using is_floating_point = is_one_of<_Ty, float, double>;
 	template <typename _Ty>
-	static constexpr bool is_floating_point_v = is_floating_point<_Ty>::value;
+	static constexpr typename is_floating_point<_Ty>::value_type
+		is_floating_point_v = is_floating_point<_Ty>::value;
 
 	/****** 实现type_identity ******/
 	template<typename _Ty>
@@ -75,7 +79,8 @@ namespace JSON {
 	//	template <typename...> typename _Tmp2， typename... _Args>
 	// 因为假如是std::vector<int>, 那这个类型不属于_Tmp1<_Args...>
 	template <typename _Ty, template <typename...> typename _Tmp>
-	static constexpr bool is_instantiation_of_v = is_instantiation_of<_Ty, _Tmp>::value;
+	static constexpr typename is_instantiation_of<_Ty, _Tmp>::value_type
+		is_instantiation_of_v = is_instantiation_of<_Ty, _Tmp>::value;
 
 	/* 实现enable_if */
 	// 主模板默认_Ty是void
@@ -129,7 +134,8 @@ namespace JSON {
 	template<unsigned _N, typename _Ty>
 	struct is_array<_Ty[_N]> : true_type {};
 	template<typename _Ty>
-	static constexpr bool is_array_v = is_array<_Ty>::value;
+	static constexpr typename is_array<_Ty>::value_type
+		is_array_v = is_array<_Ty>::value;
 
 	/* 实现remove_extent */
 	template<typename _Ty>
@@ -182,7 +188,8 @@ namespace JSON {
 	template<typename _Ret, typename ..._Args>
 	struct is_function<_Ret(_Args...)const volatile&&> : true_type {};
 	template<typename _Ty>
-	static constexpr bool is_function_v = is_function<_Ty>::value;
+	static constexpr typename is_function<_Ty>::value_type
+		is_function_v = is_function<_Ty>::value;
 
 	/* 实现add_pointer */
 	template <typename _Ty>
@@ -199,7 +206,8 @@ namespace JSON {
 	template <typename _Ty>
 	struct is_pointer<_Ty*> : std::true_type {};
 	template<typename _Ty>
-	static constexpr bool is_pointer_v = is_pointer<_Ty>::value;
+	static constexpr typename is_pointer<_Ty>::value_type
+		is_pointer_v = is_pointer<_Ty>::value;
 
 	/* 实现conditional */
 	template<bool _Bool_con, typename _First, typename _Second>
@@ -229,7 +237,8 @@ namespace JSON {
 	template<typename _Ty>
 	struct is_lvalue_reference<_Ty&&> : false_type {};
 	template<typename _Ty>
-	static constexpr bool is_lvalue_reference_v = is_lvalue_reference<_Ty>::value;
+	static constexpr typename is_lvalue_reference<_Ty>::value_type
+		is_lvalue_reference_v = is_lvalue_reference<_Ty>::value;
 
 	/* 实现判断是否是右值引用 */
 	template<typename _Ty>
@@ -239,7 +248,8 @@ namespace JSON {
 	template<typename _Ty>
 	struct is_rvalue_reference<_Ty&&> : true_type {};
 	template<typename _Ty>
-	static constexpr bool is_rvalue_reference_v = is_rvalue_reference<_Ty>::value;
+	static constexpr typename is_rvalue_reference<_Ty>::value_type
+		is_rvalue_reference_v = is_rvalue_reference<_Ty>::value;
 
 	/* 实现try_add_lvalue_reference */
 	template<typename _Ty>
